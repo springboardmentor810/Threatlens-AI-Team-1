@@ -5,3 +5,13 @@
  XGBoost                   94.94% |   94.56% | 95.38% | 94.96% | 99.02% | 41.05s   |    0.21s |
  LightGBM                  95.37% |   95.42% | 95.33% | 95.37% | 99.17% | 49.96s   |    1.18s |
  HistGradientBoosting      95.33% |   95.28% | 95.37% | 95.33% | 99.13% | 142.58s  |    2.03s |
+
+
+
+## Preliminary Conclusion
+
+Extra Trees achieved the strongest overall baseline performance, with the highest Accuracy, Precision, F1-Score, and ROC-AUC.
+
+LightGBM achieved competitive performance with efficient training and prediction time.
+
+Therefore, Extra Trees and LightGBM have been selected for hyperparameter tuning and further evaluation before making the final model selection.
