@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Theme palettes.
+ *
+ * Light is the default on :root and dark is applied by the `dark` class that
+ * App.tsx toggles on <html> (index.html ships with it, so the app opens dark).
+ * Every colour a component references resolves through these variables, which
+ * is why the toggle works without a single `dark:` variant in the markup -
+ * previously the class was toggled but nothing depended on it, so light mode
+ * did nothing at all.
+ *
+ * The text ramp inverts: slate-100 is the strongest ink and slate-600 the
+ * faintest in both themes.
+ */
+@layer base {
+  :root {
+    --c-bg: 248 250 252;
+    --c-surface: 255 255 255;
+    --c-elevated: 255 255 255;
+    --c-border: 15 23 42;
+    --c-muted: 100 116 139;
+
+    --c-slate-100: 15 23 42;
+    --c-slate-200: 30 41 59;
+    --c-slate-300: 51 65 85;
+    --c-slate-400: 82 98 122;
+    --c-slate-500: 100 116 139;
+    --c-slate-600: 148 163 184;
+    --c-slate-700: 203 213 225;
+
+    /* Overlays darken on a light ground. */
+    --c-overlay: 15 23 42;
+  }
+
+  .dark {
+    --c-bg: 10 14 23;
+    --c-surface: 15 20 32;
+    --c-elevated: 19 26 42;
+    --c-border: 148 163 184;
+    --c-muted: 148 163 184;
+
+    --c-slate-100: 241 245 249;
+    --c-slate-200: 226 232 240;
+    --c-slate-300: 203 213 225;
+    --c-slate-400: 148 163 184;
+    --c-slate-500: 100 116 139;
+    --c-slate-600: 71 85 105;
+    --c-slate-700: 51 65 85;
+
+    /* Overlays lighten on a dark ground. */
+    --c-overlay: 255 255 255;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border/[0.12];
+  }
+  body {
+    @apply bg-background text-slate-100;
+    /* Subtler on light, where the same wash reads as a smudge. */
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.06), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(168, 85, 247, 0.05), transparent);
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.12), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(168, 85, 247, 0.08), transparent);
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700/60 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-600/80;
+  }
+  :focus-visible {
+    outline: 2px solid theme("colors.accent.cyan");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-background-surface/70 backdrop-blur-xl border border-border rounded-2xl shadow-card;
+  }
+  .glass-card {
+    @apply bg-background-elevated/60 backdrop-blur-lg border border-border rounded-xl shadow-card transition-all duration-300;
+  }
+  .glass-card:hover {
+    @apply border-accent-cyan/30 shadow-glow;
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-cyan via-accent-blue to-accent-purple;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

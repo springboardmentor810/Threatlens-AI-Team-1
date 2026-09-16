@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    // Type-check vite.config.ts only. Without this, `tsc -b` emits
+    // vite.config.js beside it - and Vite loads a .js config in preference
+    // to the .ts, so a stale build silently overrides the real config.
+    "noEmit": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}

@@ -1,0 +1,91 @@
+# =====================================================================
+# ThreatLens AI — Backend Dependencies
+# =====================================================================
+
+# --- Web Framework ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-multipart==0.0.9
+
+# --- Database (PostgreSQL + SQLAlchemy) ---
+sqlalchemy==2.0.35
+# 2.9.9 ships no wheel for Python 3.13 and falls back to a source build that
+# fails with "pg_config executable not found". 2.9.10 added 3.13 wheels.
+psycopg2-binary==2.9.10
+
+# --- MongoDB (detection audit logging) ---
+pymongo==4.8.0
+
+# --- Authentication ---
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.0
+
+# --- Data Validation ---
+pydantic==2.9.1
+pydantic-settings==2.5.2
+email-validator==2.2.0
+
+# --- Static File Analysis (Member 2) ---
+pefile==2024.8.26
+yara-python==4.5.4
+# python-magic wraps libmagic. On Windows the -bin variant bundles the DLL;
+# elsewhere libmagic comes from the system package manager.
+python-magic-bin==0.4.14 ; sys_platform == "win32"
+python-magic==0.4.27 ; sys_platform != "win32"
+
+# Required by app/services/ember_extractor.py, which returns the extracted
+# feature vector as a DataFrame. Also the base of the AI pipeline in ml_model/.
+# Ceilings imposed by Python 3.10: numpy 2.5+ and pandas 3.0+ require 3.11+.
+numpy==2.2.6
+pandas==2.3.3
+
+# --- EMBER PE feature extraction ---
+#
+# REQUIRES PYTHON 3.10. EMBER's features.py references lief.bad_format /
+# lief.pe_error, which LIEF removed in 0.14, so the newest usable LIEF is
+# 0.12.x - and LIEF 0.12.x publishes no wheel past cp310. That is the single
+# reason this project targets 3.10 rather than a newer interpreter.
+lief==0.12.3
+# Imported by ember/__init__.py but not declared by its setup.
+tqdm
+#
+# EMBER itself is NOT on PyPI ("No matching distribution found") and so cannot
+# be pinned here. Install it after the requirements file:
+#
+#     pip install git+https://github.com/elastic/ember.git
+#
+# It is also unmaintained and needs two API-compatibility shims against modern
+# numpy/scikit-learn; see backend/app/services/ember_compat.py, which applies
+# them without altering any feature computation.
+# backend/app/services/ember_extractor.py degrades gracefully without EMBER.
+
+# --- Utilities ---
+python-dotenv==1.0.1
+# Required by app/alerts/email_service.py, which renders the alert email
+# template with jinja2.Environment.
+jinja2==3.1.4
+
+# --- PDF Report Generation ---
+reportlab==5.0.1
+pillow>=9.0.0
+
+# --- Testing ---
+pytest==8.3.3
+httpx==0.27.2
+
+# --- AI/ML inference ---
+# Only what is needed to LOAD the saved models and score one sample. The
+# training/analysis stack (duckdb, pyarrow, matplotlib, shap) lives in
+# ml_model/requirements.txt so the API deployment does not pull it in.
+#
+# NOTE: the two shipped artifacts were pickled under different scikit-learn
+# versions - ml_model/saved_model/extra_trees_baseline.pkl under 1.7.2 and
+# lightgbm_tuned.pkl under 1.9.0 - so no single pin loads both without an
+# InconsistentVersionWarning. 1.7.2 matches the larger ExtraTrees artifact and
+# is the newest scikit-learn that still runs on Python 3.10 (see the EMBER
+# note below for why 3.10 is required); LightGBM's sklearn wrapper warns
+# instead. Re-exporting one of the two artifacts would clear the warning.
+scikit-learn==1.7.2
+lightgbm==4.7.0
+joblib==1.6.0

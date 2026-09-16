@@ -1,0 +1,47 @@
+# --- Datasets -------------------------------------------------------------
+# The EMBER dataset is large and licensed separately; preprocessing.py expects
+# it at ml_model/dataset/raw/train_ember_2018_v2_features.parquet.
+ml_model/dataset/raw/
+ml_model/dataset/processed/
+ml_model/dataset/train_test/
+
+# --- Python ---------------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# --- Environment ----------------------------------------------------------
+.env
+.env.*
+# ...but the template must stay tracked: the pattern above would otherwise
+# hide the one file a new clone needs to copy.
+!.env.example
+
+# --- Virtual environments -------------------------------------------------
+venv/
+.venv/
+.envs
+
+# --- Local databases ------------------------------------------------------
+# SQLite is the zero-setup default (see backend/app/config/settings.py) and
+# the test suites write throwaway files next to the code.
+*.db
+*.sqlite3
+
+# --- Runtime artefacts ----------------------------------------------------
+# Files submitted for scanning; never commit a sample.
+backend/storage/uploaded_files/
+
+# --- Frontend -------------------------------------------------------------
+# frontend/.gitignore covers node_modules, dist and the TypeScript build
+# outputs; repeated here so a clone is safe even if that file is missing.
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# --- Editors / OS ---------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,83 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: "class",
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      // Theme-aware tokens. Values live as RGB triplets in src/index.css so a
+      // single class on <html> flips the whole palette; the accent and severity
+      // hues are deliberately identical in both themes.
+      //
+      // Written as rgb(... / <alpha-value>) so Tailwind's opacity modifiers
+      // (bg-white/5, border-border/50) keep working.
+      colors: {
+        background: {
+          DEFAULT: "rgb(var(--c-bg) / <alpha-value>)",
+          surface: "rgb(var(--c-surface) / <alpha-value>)",
+          elevated: "rgb(var(--c-elevated) / <alpha-value>)",
+        },
+        border: {
+          DEFAULT: "rgb(var(--c-border) / <alpha-value>)",
+        },
+        accent: {
+          cyan: "#22d3ee",
+          blue: "#3b82f6",
+          purple: "#a855f7",
+          indigo: "#6366f1",
+        },
+        severity: {
+          critical: "#f43f5e",
+          high: "#fb923c",
+          medium: "#facc15",
+          low: "#34d399",
+          info: "#38bdf8",
+        },
+        muted: "rgb(var(--c-muted) / <alpha-value>)",
+
+        // Text ramp. slate-100 is the strongest ink and slate-600 the faintest
+        // in BOTH themes - the values invert, the meaning does not, so no
+        // component had to change. slate-950 is the exception: it is ink on the
+        // accent gradient (buttons, logo) and stays dark either way.
+        slate: {
+          100: "rgb(var(--c-slate-100) / <alpha-value>)",
+          200: "rgb(var(--c-slate-200) / <alpha-value>)",
+          300: "rgb(var(--c-slate-300) / <alpha-value>)",
+          400: "rgb(var(--c-slate-400) / <alpha-value>)",
+          500: "rgb(var(--c-slate-500) / <alpha-value>)",
+          600: "rgb(var(--c-slate-600) / <alpha-value>)",
+          700: "rgb(var(--c-slate-700) / <alpha-value>)",
+          950: "#020617",
+        },
+
+        // Subtle overlays (bg-white/5, border-white/10) must lighten on dark
+        // and darken on light, so this follows the theme too.
+        white: "rgb(var(--c-overlay) / <alpha-value>)",
+      },
+      fontFamily: {
+        display: ["'Space Grotesk'", "sans-serif"],
+        body: ["'Inter'", "sans-serif"],
+        mono: ["'JetBrains Mono'", "monospace"],
+      },
+      boxShadow: {
+        glow: "0 0 24px rgba(34, 211, 238, 0.15)",
+        "glow-purple": "0 0 24px rgba(168, 85, 247, 0.18)",
+        card: "0 4px 24px rgba(0,0,0,0.35)",
+      },
+      backgroundImage: {
+        "grid-pattern":
+          "linear-gradient(rgba(148,163,184,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.05) 1px, transparent 1px)",
+      },
+      animation: {
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        scan: "scan 2.5s linear infinite",
+      },
+      keyframes: {
+        scan: {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(100%)" },
+        },
+      },
+    },
+  },
+  plugins: [],
+};
