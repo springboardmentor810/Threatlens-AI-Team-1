@@ -12,10 +12,13 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from fastapi.testclient import TestClient
+from jose import jwt
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.config import settings
 from app.database.database import Base, get_db
+from app.models.user import User
 from app.modules.threat_monitoring.models import ThreatLog, ThreatTimelineEvent  # noqa: register models
 
 # Override database before importing app
@@ -76,6 +79,32 @@ def _create_detection(**kwargs):
     }
     defaults.update(kwargs)
     return client.post("/api/v1/threats/detect", json=defaults)
+
+
+def _auth_header(role: str = "administrator", email: str | None = None) -> dict:
+    email = email or f"{role}@threatlens.test"
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            user = User(
+                full_name=role.replace("_", " ").title(),
+                email=email,
+                password="unused-hash",
+                role=role,
+                is_active=True,
+            )
+            db.add(user)
+            db.commit()
+    finally:
+        db.close()
+
+    token = jwt.encode(
+        {"sub": email, "role": role},
+        settings.JWT_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+    return {"Authorization": f"Bearer {token}"}
 
 
 # =====================================================================
@@ -256,21 +285,48 @@ class TestStatusAPI:
 class TestDeleteAPI:
     """Tests for DELETE /api/v1/threats/{id}."""
 
-    def test_delete_threat(self):
-        """Can delete a threat."""
+    def test_delete_threat_as_admin(self):
+        """Can delete a threat with administrator role."""
         create_response = _create_detection()
         threat_id = create_response.json()["threat_id"]
 
-        response = client.delete(f"/api/v1/threats/{threat_id}")
+        response = client.delete(f"/api/v1/threats/{threat_id}", headers=_auth_header("administrator"))
         assert response.status_code == 204
 
         # Verify it's gone
         get_response = client.get(f"/api/v1/threats/{threat_id}")
         assert get_response.status_code == 404
 
+    def test_delete_threat_as_analyst(self):
+        """Can delete a threat with security_analyst role."""
+        create_response = _create_detection()
+        threat_id = create_response.json()["threat_id"]
+
+        response = client.delete(f"/api/v1/threats/{threat_id}", headers=_auth_header("security_analyst"))
+        assert response.status_code == 204
+
+        get_response = client.get(f"/api/v1/threats/{threat_id}")
+        assert get_response.status_code == 404
+
+    def test_delete_threat_forbidden_for_researcher(self):
+        """Researcher role is forbidden from deleting threats."""
+        create_response = _create_detection()
+        threat_id = create_response.json()["threat_id"]
+
+        response = client.delete(f"/api/v1/threats/{threat_id}", headers=_auth_header("researcher"))
+        assert response.status_code == 403
+
+    def test_delete_threat_unauthenticated(self):
+        """Unauthenticated delete request returns 401."""
+        create_response = _create_detection()
+        threat_id = create_response.json()["threat_id"]
+
+        response = client.delete(f"/api/v1/threats/{threat_id}")
+        assert response.status_code == 401
+
     def test_delete_nonexistent(self):
         """Deleting nonexistent threat returns 404."""
-        response = client.delete("/api/v1/threats/nonexistent")
+        response = client.delete("/api/v1/threats/nonexistent", headers=_auth_header("administrator"))
         assert response.status_code == 404
 
 

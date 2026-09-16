@@ -33,11 +33,15 @@ export default function AreaChartCard({
           <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#131a2a",
-              border: "1px solid rgba(148,163,184,0.15)",
+              backgroundColor: "rgb(var(--c-surface))",
+              border: "1px solid rgb(var(--c-border) / 0.15)",
               borderRadius: "10px",
               fontSize: "12px",
+              color: "rgb(var(--c-slate-100))",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
             }}
+            itemStyle={{ color: "rgb(var(--c-slate-100))" }}
+            labelStyle={{ color: "rgb(var(--c-slate-300))" }}
           />
           <Area type="monotone" dataKey={areaKey} stroke={color} strokeWidth={2} fill={`url(#grad-${areaKey})`} />
         </AreaChart>

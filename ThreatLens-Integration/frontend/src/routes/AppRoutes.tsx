@@ -8,6 +8,9 @@ import Skeleton from "@/components/ui/Skeleton";
 import { ROUTES } from "@/constants/routes";
 
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage"));
 const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
 const UploadPage = lazy(() => import("@/pages/upload/UploadPage"));
 const ReportsPage = lazy(() => import("@/pages/reports/ReportsPage"));
@@ -34,6 +37,9 @@ export default function AppRoutes() {
         {/* Public routes */}
         <Route element={<AuthLayout />}>
           <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+          <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+          <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+          <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
         </Route>
 
         {/* Protected routes — must be logged in AND have a permitted role */}

@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { UploadCloud, FileArchive, ScanLine, Hash, Clock, FileWarning } from "lucide-react";
+import { UploadCloud, FileArchive, ScanLine, Hash, Clock, FileWarning, Trash2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { fetchUploadHistory, addActiveUpload, updateActiveUploadProgress, completeUpload } from "@/redux/slices/uploadSlice";
+import { fetchUploadHistory, addActiveUpload, updateActiveUploadProgress, completeUpload, deleteUpload } from "@/redux/slices/uploadSlice";
 import { uploadApi } from "@/api/uploadApi";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { Table, THead, TBody, Tr, Th, Td } from "@/components/ui/Table";
 import { useToast } from "@/hooks/useToast";
 import { truncateHash, timeAgo } from "@/utils/formatters";
 import { UploadedFile } from "@/types/upload.types";
+import { canAccess } from "@/constants/roles";
 
 // ── IMPROVEMENT 1: File upload validation ──────────────────────────────
 // Reasonable allow-list for a malware-scanning demo: common executable,
@@ -52,9 +54,27 @@ function validateFile(file: File): { valid: true } | { valid: false; reason: str
 export default function UploadPage() {
   const dispatch = useAppDispatch();
   const { history, activeUploads } = useAppSelector((s) => s.upload);
+  const { user } = useAppSelector((s) => s.auth);
+  const canDelete = canAccess(user?.role, "reports");
   const [isDragging, setIsDragging] = useState(false);
   const [selectedResult, setSelectedResult] = useState<UploadedFile | null>(null);
+  const [fileToDelete, setFileToDelete] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
+
+  async function handleConfirmDelete() {
+    if (!fileToDelete) return;
+    try {
+      await dispatch(deleteUpload(fileToDelete.id)).unwrap();
+      toast({ title: "Upload deleted", variant: "success" });
+      if (selectedResult?.id === fileToDelete.id) {
+        setSelectedResult(null);
+      }
+    } catch {
+      toast({ title: "Failed to delete upload", variant: "error" });
+    } finally {
+      setFileToDelete(null);
+    }
+  }
 
   useEffect(() => {
     dispatch(fetchUploadHistory());
@@ -179,6 +199,7 @@ export default function UploadPage() {
                 <Th>Size</Th>
                 <Th>Risk</Th>
                 <Th>Uploaded</Th>
+                {canDelete && <Th className="text-right">Actions</Th>}
               </THead>
               <TBody>
                 {history.map((f) => (
@@ -189,6 +210,23 @@ export default function UploadPage() {
                       <Badge severity={f.riskLevel ?? "safe"} />
                     </Td>
                     <Td className="text-xs text-muted">{timeAgo(f.uploadedAt)}</Td>
+                    {canDelete && (
+                      <Td>
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFileToDelete(f);
+                            }}
+                            title="Delete Record"
+                            className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-severity-critical hover:bg-white/5"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </Td>
+                    )}
                   </Tr>
                 ))}
               </TBody>
@@ -343,6 +381,24 @@ export default function UploadPage() {
           </Card>
         </div>
       </div>
+
+      <Modal isOpen={!!fileToDelete} onClose={() => setFileToDelete(null)} title="Delete Upload">
+        {fileToDelete && (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-300">
+              Are you sure you want to delete <span className="font-mono text-xs text-white">{fileToDelete.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" size="sm" onClick={() => setFileToDelete(null)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" size="sm" onClick={handleConfirmDelete}>
+                Delete
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

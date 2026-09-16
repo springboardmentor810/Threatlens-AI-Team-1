@@ -40,7 +40,46 @@ def _email(role: str) -> str:
     return f"{role}-{uuid.uuid4().hex[:8]}@example.com"
 
 
-def _register(role: str = "security_analyst", email: str | None = None, **overrides):
+def _admin_token() -> str:
+    from app.database.database import SessionLocal
+    from app.models.user import User
+    from app.auth.security import hash_password
+
+    admin_email = "bootstrap-admin@example.com"
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == admin_email).first()
+        if not user:
+            user = User(
+                full_name="Bootstrap Admin",
+                email=admin_email,
+                password=hash_password(PASSWORD),
+                role="administrator",
+                is_active=True,
+            )
+            db.add(user)
+            db.commit()
+    finally:
+        db.close()
+
+    return jwt.encode(
+        {"sub": admin_email, "role": "administrator"},
+        settings.JWT_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+
+
+def _signup(email: str | None = None, full_name: str = "Test Analyst", **overrides):
+    payload = {
+        "full_name": full_name,
+        "email": email or _email("security_analyst"),
+        "password": PASSWORD,
+    }
+    payload.update(overrides)
+    return client.post("/api/v1/auth/signup", json=payload), payload
+
+
+def _register(role: str = "security_analyst", email: str | None = None, auth: bool = True, **overrides):
     payload = {
         "full_name": role.replace("_", " ").title(),
         "email": email or _email(role),
@@ -48,7 +87,8 @@ def _register(role: str = "security_analyst", email: str | None = None, **overri
         "role": role,
     }
     payload.update(overrides)
-    return client.post("/api/v1/auth/register", json=payload), payload
+    headers = {"Authorization": f"Bearer {_admin_token()}"} if auth else {}
+    return client.post("/api/v1/auth/register", json=payload, headers=headers), payload
 
 
 def _login(email: str, password: str = PASSWORD):
@@ -62,8 +102,42 @@ def _auth_header(role: str = "security_analyst") -> dict:
 
 
 # =====================================================================
-# REGISTRATION
+# SIGNUP & REGISTRATION
 # =====================================================================
+
+def test_signup_creates_security_analyst_user():
+    resp, payload = _signup()
+    assert resp.status_code == 201, resp.text
+    body = resp.json()
+    assert body["email"] == payload["email"]
+    assert body["role"] == "security_analyst"
+    assert body["is_active"] is True
+    assert "password" not in body
+
+
+def test_register_requires_admin_token():
+    """Unauthenticated call to /register must return 401."""
+    resp, _ = _register(role="administrator", auth=False)
+    assert resp.status_code == 401
+
+
+def test_register_forbidden_for_non_admin():
+    """Security analyst cannot create arbitrary users via /register."""
+    _, analyst_payload = _signup()
+    token = _login(analyst_payload["email"]).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.post(
+        "/api/v1/auth/register",
+        json={
+            "full_name": "New Admin",
+            "email": "newadmin@example.com",
+            "password": PASSWORD,
+            "role": "administrator",
+        },
+        headers=headers,
+    )
+    assert resp.status_code == 403
+
 
 @pytest.mark.parametrize("role", ALL_ROLES)
 def test_register_accepts_every_platform_role(role):
@@ -267,3 +341,80 @@ def test_only_administrator_may_delete_an_alert():
 
     allowed = client.delete(f"/api/v1/alerts/{alert_id}", headers=_auth_header("administrator"))
     assert allowed.status_code == 204
+
+
+# =====================================================================
+# FORGOT & RESET PASSWORD
+# =====================================================================
+
+def test_forgot_password_unknown_email_returns_generic_200():
+    resp = client.post("/api/v1/auth/forgot-password", json={"email": "unknown@example.com"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "If that address exists" in data["message"]
+    assert "dev_reset_link" not in data
+
+
+def test_forgot_password_known_email_in_dev_returns_link():
+    _, payload = _signup()
+    resp = client.post("/api/v1/auth/forgot-password", json={"email": payload["email"]})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "If that address exists" in data["message"]
+    assert "dev_reset_link" in data
+    assert "/reset-password?token=" in data["dev_reset_link"]
+
+
+def test_reset_password_changes_password():
+    _, payload = _signup()
+    forgot_resp = client.post("/api/v1/auth/forgot-password", json={"email": payload["email"]})
+    reset_link = forgot_resp.json()["dev_reset_link"]
+    token = reset_link.split("token=")[-1]
+
+    new_pass = "BrandNewSecret!99"
+    reset_resp = client.post(
+        "/api/v1/auth/reset-password",
+        json={"token": token, "new_password": new_pass},
+    )
+    assert reset_resp.status_code == 200
+
+    # Old password no longer works
+    assert _login(payload["email"], PASSWORD).status_code == 401
+
+    # New password works
+    login_resp = _login(payload["email"], new_pass)
+    assert login_resp.status_code == 200
+    assert "access_token" in login_resp.json()
+
+
+def test_reset_password_rejects_login_token():
+    _, payload = _signup()
+    login_token = _login(payload["email"]).json()["access_token"]
+
+    resp = client.post(
+        "/api/v1/auth/reset-password",
+        json={"token": login_token, "new_password": "NewPassword!123"},
+    )
+    assert resp.status_code == 400
+    assert "Invalid or expired reset token" in resp.json()["detail"]
+
+
+def test_reset_password_rejects_expired_token():
+    from datetime import datetime, timedelta
+
+    expired_token = jwt.encode(
+        {
+            "sub": "someuser@example.com",
+            "purpose": "password_reset",
+            "exp": datetime.utcnow() - timedelta(minutes=5),
+        },
+        settings.JWT_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+
+    resp = client.post(
+        "/api/v1/auth/reset-password",
+        json={"token": expired_token, "new_password": "NewPassword!123"},
+    )
+    assert resp.status_code == 400
+    assert "Invalid or expired reset token" in resp.json()["detail"]

@@ -17,20 +17,21 @@ export default {
           elevated: "rgb(var(--c-elevated) / <alpha-value>)",
         },
         border: {
-          DEFAULT: "rgb(var(--c-border) / <alpha-value>)",
+          DEFAULT: "rgb(var(--c-border) / 0.10)",
+          strong: "rgb(var(--c-border) / <alpha-value>)",
         },
         accent: {
-          cyan: "#22d3ee",
-          blue: "#3b82f6",
-          purple: "#a855f7",
-          indigo: "#6366f1",
+          cyan: "rgb(var(--c-accent-cyan) / <alpha-value>)",
+          blue: "rgb(var(--c-accent-blue) / <alpha-value>)",
+          purple: "rgb(var(--c-accent-purple) / <alpha-value>)",
+          indigo: "rgb(var(--c-accent-indigo) / <alpha-value>)",
         },
         severity: {
-          critical: "#f43f5e",
-          high: "#fb923c",
-          medium: "#facc15",
-          low: "#34d399",
-          info: "#38bdf8",
+          critical: "rgb(var(--c-severity-critical) / <alpha-value>)",
+          high: "rgb(var(--c-severity-high) / <alpha-value>)",
+          medium: "rgb(var(--c-severity-medium) / <alpha-value>)",
+          low: "rgb(var(--c-severity-low) / <alpha-value>)",
+          info: "rgb(var(--c-severity-info) / <alpha-value>)",
         },
         muted: "rgb(var(--c-muted) / <alpha-value>)",
 
@@ -59,9 +60,9 @@ export default {
         mono: ["'JetBrains Mono'", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 24px rgba(34, 211, 238, 0.15)",
-        "glow-purple": "0 0 24px rgba(168, 85, 247, 0.18)",
-        card: "0 4px 24px rgba(0,0,0,0.35)",
+        glow: "var(--shadow-glow)",
+        "glow-purple": "var(--shadow-glow-purple)",
+        card: "var(--shadow-card)",
       },
       backgroundImage: {
         "grid-pattern":

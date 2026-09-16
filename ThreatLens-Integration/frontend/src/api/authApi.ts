@@ -45,6 +45,28 @@ export const authApi = {
     return { user: toUser(profile), token };
   },
 
+  signup: async (payload: {
+    full_name: string;
+    email: string;
+    password: string;
+  }): Promise<User> => {
+    const { data } = await axiosInstance.post<UserResponse>("/auth/signup", payload);
+    return toUser(data);
+  },
+
+  forgotPassword: async (email: string): Promise<{ message: string; dev_reset_link?: string }> => {
+    const { data } = await axiosInstance.post<{ message: string; dev_reset_link?: string }>(
+      "/auth/forgot-password",
+      { email }
+    );
+    return data;
+  },
+
+  resetPassword: async (payload: { token: string; new_password: string }): Promise<{ message: string }> => {
+    const { data } = await axiosInstance.post<{ message: string }>("/auth/reset-password", payload);
+    return data;
+  },
+
   register: async (payload: {
     full_name: string;
     email: string;

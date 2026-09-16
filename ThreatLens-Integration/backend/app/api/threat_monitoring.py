@@ -32,6 +32,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Header, Response, 
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
+from app.middleware.auth_middleware import RoleChecker
 from app.modules.threat_monitoring.service import ThreatMonitoringService
 from app.modules.threat_monitoring.mongo_repository import MongoThreatLogger
 from app.services.pdf_report import generate_threat_pdf, generate_summary_pdf
@@ -592,13 +593,14 @@ def resolve_threat(
     "/{threat_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a threat",
-    description="Permanently delete a threat and all associated data. Admin only.",
+    description="Permanently delete a threat and all associated data.",
+    dependencies=[Depends(RoleChecker(["administrator", "security_analyst"]))],
 )
 def delete_threat(
     threat_id: str,
     db: Session = Depends(get_db),
 ):
-    """Delete a threat record. Requires admin role."""
+    """Delete a threat record. Requires administrator or security_analyst role."""
     deleted = ThreatMonitoringService.delete_threat(db, threat_id)
     if not deleted:
         raise HTTPException(

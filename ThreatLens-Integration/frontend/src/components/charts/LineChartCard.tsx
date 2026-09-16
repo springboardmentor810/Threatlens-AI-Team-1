@@ -2,10 +2,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 
 const chartTooltipStyle = {
-  backgroundColor: "#131a2a",
-  border: "1px solid rgba(148,163,184,0.15)",
+  backgroundColor: "rgb(var(--c-surface))",
+  border: "1px solid rgb(var(--c-border) / 0.15)",
   borderRadius: "10px",
   fontSize: "12px",
+  color: "rgb(var(--c-slate-100))",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
 };
 
 export default function LineChartCard({
@@ -30,8 +32,12 @@ export default function LineChartCard({
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.08)" />
           <XAxis dataKey={xKey} stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
           <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
-          <Tooltip contentStyle={chartTooltipStyle} />
-          <Legend wrapperStyle={{ fontSize: "12px" }} />
+          <Tooltip
+            contentStyle={chartTooltipStyle}
+            itemStyle={{ color: "rgb(var(--c-slate-100))" }}
+            labelStyle={{ color: "rgb(var(--c-slate-300))" }}
+          />
+          <Legend wrapperStyle={{ fontSize: "12px", color: "rgb(var(--c-slate-300))" }} />
           {lines.map((l) => (
             <Line
               key={l.key}

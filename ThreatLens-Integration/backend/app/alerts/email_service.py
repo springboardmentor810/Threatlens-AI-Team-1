@@ -28,6 +28,34 @@ def render_alert_email(alert: Alert) -> str:
     return template.render(alert=alert)
 
 
+def send_email(to: str, subject: str, html_body: str) -> bool:
+    """
+    Sends a generic email via SMTP.
+    Returns True on success, False on failure.
+    """
+    if not to:
+        return False
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = subject
+    message["From"] = f"{settings.smtp_from_name} <{settings.smtp_username}>"
+    message["To"] = to
+    message.attach(MIMEText(html_body, "html"))
+
+    try:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+            if settings.smtp_use_tls:
+                server.starttls()
+            if settings.smtp_username:
+                server.login(settings.smtp_username, settings.smtp_password)
+            server.sendmail(settings.smtp_username, [to], message.as_string())
+        logger.info("Email sent to %s with subject: %s", to, subject)
+        return True
+    except Exception as exc:  # noqa: BLE001 - log and degrade gracefully
+        logger.error("Failed to send email to %s: %s", to, exc)
+        return False
+
+
 def send_alert_email(alert: Alert) -> bool:
     """
     Sends an email notification for the given alert.
@@ -40,22 +68,4 @@ def send_alert_email(alert: Alert) -> bool:
 
     subject = f"[{alert.severity.value.upper()}] ThreatLens Alert: {alert.title}"
     html_body = render_alert_email(alert)
-
-    message = MIMEMultipart("alternative")
-    message["Subject"] = subject
-    message["From"] = f"{settings.smtp_from_name} <{settings.smtp_username}>"
-    message["To"] = alert.recipient_email
-    message.attach(MIMEText(html_body, "html"))
-
-    try:
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
-            if settings.smtp_use_tls:
-                server.starttls()
-            if settings.smtp_username:
-                server.login(settings.smtp_username, settings.smtp_password)
-            server.sendmail(settings.smtp_username, [alert.recipient_email], message.as_string())
-        logger.info("Alert email sent for alert_id=%s", alert.id)
-        return True
-    except Exception as exc:  # noqa: BLE001 - log and degrade gracefully
-        logger.error("Failed to send alert email for alert_id=%s: %s", alert.id, exc)
-        return False
+    return send_email(alert.recipient_email, subject, html_body)

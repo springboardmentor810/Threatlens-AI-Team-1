@@ -181,15 +181,39 @@ export default function ThreatDetailsPage() {
                 </div>
               </div>
             ) : isAiNotApplicable ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-muted mb-1">Prediction</p>
-                    <p className="text-sm font-semibold text-slate-400">—</p>
+                    <p
+                      className={`text-sm font-semibold ${
+                        (threat.threatName || "").toUpperCase() === "BENIGN"
+                          ? "text-severity-low"
+                          : "text-severity-critical"
+                      }`}
+                    >
+                      {threat.threatName || "—"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted mb-1">Malware Probability</p>
-                    <p className="text-sm font-semibold text-slate-400">—</p>
+                    <p className="text-xs text-muted mb-1">Static rule score</p>
+                    <p className="text-sm font-semibold text-slate-100">
+                      {typeof threat.malwareProbability === "number"
+                        ? `${threat.malwareProbability}%`
+                        : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted mb-1">Risk Score</p>
+                    <p className="text-sm font-semibold text-slate-100">
+                      {threat.threatScore}/100
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted mb-1">Risk Level</p>
+                    <p className="text-sm font-semibold text-slate-100 uppercase">
+                      {threat.riskLevel || "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted mb-1">Status</p>
@@ -198,6 +222,16 @@ export default function ThreatDetailsPage() {
                     </span>
                   </div>
                 </div>
+
+                <div className="border-t border-white/5 pt-3 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted">Detection Model</span>
+                    <span className="text-slate-300">
+                      {threat.detectionEngine || "Static analysis (YARA + indicators)"}
+                    </span>
+                  </div>
+                </div>
+
                 <div className="rounded-lg bg-background-surface/60 border border-border p-3 text-xs text-muted">
                   <p>
                     <strong className="text-slate-300">Reason:</strong>{" "}

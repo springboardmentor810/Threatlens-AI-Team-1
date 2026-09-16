@@ -53,7 +53,9 @@ export const uploadApi = {
     const detection = data.detection?.data ?? data.detection ?? null;
 
     return {
-      id: detection?.id ? String(detection.id) : data.stored_filename,
+      id: (detection?.threat_id ?? detection?.id)
+        ? String(detection.threat_id ?? detection.id)
+        : data.stored_filename,
       name: data.original_filename,
       size: formatBytes(data.metadata?.size_bytes),
       type: data.file_type?.mime_type ?? file.type ?? "application/octet-stream",
@@ -67,5 +69,9 @@ export const uploadApi = {
       yaraMatches: data.yara_results?.matched_rules ?? [],
       reportUrl: data.report_url,
     };
+  },
+
+  deleteUpload: async (id: string): Promise<void> => {
+    await axiosInstance.delete(`/threats/${id}`);
   },
 };

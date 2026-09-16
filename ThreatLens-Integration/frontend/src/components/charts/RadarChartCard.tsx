@@ -21,11 +21,15 @@ export default function RadarChartCard({
           <Radar dataKey="value" stroke="#a855f7" fill="#a855f7" fillOpacity={0.35} />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#131a2a",
-              border: "1px solid rgba(148,163,184,0.15)",
+              backgroundColor: "rgb(var(--c-surface))",
+              border: "1px solid rgb(var(--c-border) / 0.15)",
               borderRadius: "10px",
               fontSize: "12px",
+              color: "rgb(var(--c-slate-100))",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
             }}
+            itemStyle={{ color: "rgb(var(--c-slate-100))" }}
+            labelStyle={{ color: "rgb(var(--c-slate-300))" }}
           />
         </RadarChart>
       </ResponsiveContainer>

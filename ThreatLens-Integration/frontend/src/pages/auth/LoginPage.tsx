@@ -141,7 +141,7 @@ export default function LoginPage() {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="text-xs font-medium text-slate-400">Password</label>
-            <Link to="#" className="text-xs text-accent-cyan hover:text-accent-cyan/80">
+            <Link to={ROUTES.FORGOT_PASSWORD} className="text-xs text-accent-cyan hover:text-accent-cyan/80">
               Forgot password?
             </Link>
           </div>
@@ -178,6 +178,13 @@ export default function LoginPage() {
             </>
           )}
         </Button>
+
+        <div className="text-center pt-2">
+          <span className="text-xs text-muted">Don't have an account? </span>
+          <Link to={ROUTES.REGISTER} className="text-xs text-accent-cyan hover:underline font-medium">
+            Create one
+          </Link>
+        </div>
       </form>
 
       <p className="text-xs text-center text-muted mt-6">

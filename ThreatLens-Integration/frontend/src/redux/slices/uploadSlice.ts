@@ -18,6 +18,11 @@ export const fetchUploadHistory = createAsyncThunk("upload/fetchHistory", async 
   return uploadApi.getHistory();
 });
 
+export const deleteUpload = createAsyncThunk("upload/deleteUpload", async (id: string) => {
+  await uploadApi.deleteUpload(id);
+  return id;
+});
+
 const uploadSlice = createSlice({
   name: "upload",
   initialState,
@@ -55,6 +60,9 @@ const uploadSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(fetchUploadHistory.fulfilled, (state, action) => {
       state.history = action.payload;
+    });
+    builder.addCase(deleteUpload.fulfilled, (state, action) => {
+      state.history = state.history.filter((f) => f.id !== action.payload);
     });
   },
 });

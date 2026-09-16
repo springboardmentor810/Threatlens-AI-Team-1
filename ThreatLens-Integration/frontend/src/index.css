@@ -17,7 +17,7 @@
  */
 @layer base {
   :root {
-    --c-bg: 248 250 252;
+    --c-bg: 246 248 252;
     --c-surface: 255 255 255;
     --c-elevated: 255 255 255;
     --c-border: 15 23 42;
@@ -26,10 +26,28 @@
     --c-slate-100: 15 23 42;
     --c-slate-200: 30 41 59;
     --c-slate-300: 51 65 85;
-    --c-slate-400: 82 98 122;
+    --c-slate-400: 71 85 105;
     --c-slate-500: 100 116 139;
     --c-slate-600: 148 163 184;
-    --c-slate-700: 203 213 225;
+    --c-slate-700: 226 232 240;
+
+    /* Theme-adaptive accents: rich & legible in light mode */
+    --c-accent-cyan: 8 145 178;
+    --c-accent-blue: 37 99 235;
+    --c-accent-purple: 147 51 234;
+    --c-accent-indigo: 79 70 229;
+
+    /* Theme-adaptive severity colors */
+    --c-severity-critical: 225 29 72;
+    --c-severity-high: 234 88 12;
+    --c-severity-medium: 217 119 6;
+    --c-severity-low: 5 150 105;
+    --c-severity-info: 2 132 199;
+
+    /* Soft layered shadow for neat light mode depth */
+    --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 8px 20px -4px rgba(15, 23, 42, 0.05);
+    --shadow-glow: 0 4px 20px -2px rgba(8, 145, 178, 0.18);
+    --shadow-glow-purple: 0 4px 20px -2px rgba(147, 51, 234, 0.18);
 
     /* Overlays darken on a light ground. */
     --c-overlay: 15 23 42;
@@ -50,6 +68,24 @@
     --c-slate-600: 71 85 105;
     --c-slate-700: 51 65 85;
 
+    /* Glowing neon accents in dark mode */
+    --c-accent-cyan: 34 211 238;
+    --c-accent-blue: 59 130 246;
+    --c-accent-purple: 168 85 247;
+    --c-accent-indigo: 99 102 241;
+
+    /* Neon severity colors */
+    --c-severity-critical: 244 63 94;
+    --c-severity-high: 251 146 60;
+    --c-severity-medium: 250 204 21;
+    --c-severity-low: 52 211 153;
+    --c-severity-info: 56 189 248;
+
+    /* Dark mode shadow */
+    --shadow-card: 0 4px 24px 0 rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 24px rgba(34, 211, 238, 0.15);
+    --shadow-glow-purple: 0 0 24px rgba(168, 85, 247, 0.18);
+
     /* Overlays lighten on a dark ground. */
     --c-overlay: 255 255 255;
   }
@@ -57,14 +93,15 @@
 
 @layer base {
   * {
-    @apply border-border/[0.12];
+    @apply border-border;
   }
   body {
     @apply bg-background text-slate-100;
-    /* Subtler on light, where the same wash reads as a smudge. */
+    /* Clean cyber ambient mesh gradient */
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.06), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(168, 85, 247, 0.05), transparent);
+      radial-gradient(ellipse 80% 60% at 50% -20%, rgba(37, 99, 235, 0.06), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 10%, rgba(147, 51, 234, 0.04), transparent),
+      radial-gradient(ellipse 60% 50% at 0% 90%, rgba(8, 145, 178, 0.04), transparent);
     background-attachment: fixed;
   }
   .dark body {
@@ -80,31 +117,28 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-700/60 rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-600/80;
+    @apply bg-slate-600/40 rounded-full hover:bg-slate-500/60 transition-colors;
   }
   :focus-visible {
-    outline: 2px solid theme("colors.accent.cyan");
+    outline: 2px solid rgb(var(--c-accent-cyan));
     outline-offset: 2px;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-background-surface/70 backdrop-blur-xl border border-border rounded-2xl shadow-card;
+    @apply bg-background-surface/85 backdrop-blur-xl border border-border rounded-2xl shadow-card;
   }
   .glass-card {
-    @apply bg-background-elevated/60 backdrop-blur-lg border border-border rounded-xl shadow-card transition-all duration-300;
+    @apply bg-background-elevated/80 backdrop-blur-lg border border-border rounded-xl shadow-card transition-all duration-300;
   }
   .glass-card:hover {
-    @apply border-accent-cyan/30 shadow-glow;
+    @apply border-accent-cyan/35 shadow-glow;
   }
   .grid-bg {
     background-image:
-      linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+      linear-gradient(rgb(var(--c-border) / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--c-border) / 0.05) 1px, transparent 1px);
     background-size: 32px 32px;
   }
   .text-gradient {

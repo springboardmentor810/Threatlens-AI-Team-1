@@ -297,3 +297,19 @@ def test_repeated_upload_of_the_same_file_does_not_duplicate_the_alert(force_ver
 
     alerts = client.get("/api/v1/alerts", headers=_auth()).json()
     assert len(alerts) == 1
+
+
+def test_upload_detection_exposes_threat_id_matching_threat_list():
+    """body['detection']['threat_id'] must match the ID returned by GET /api/v1/threats."""
+    pdf_sample = b"%PDF-1.4 sample content for threat id test"
+    res = _upload(pdf_sample, filename="test_sample.pdf")
+    assert res.status_code == 200
+    body = res.json()
+    assert "detection" in body and body["detection"] is not None
+    assert "threat_id" in body["detection"]
+    detection_threat_id = body["detection"]["threat_id"]
+
+    threats = client.get("/api/v1/threats").json()
+    assert threats["total"] >= 1
+    recorded_ids = [item["id"] for item in threats["items"]]
+    assert detection_threat_id in recorded_ids

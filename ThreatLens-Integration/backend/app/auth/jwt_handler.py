@@ -36,3 +36,25 @@ def decode_access_token(token: str) -> dict:
         return payload
     except jwt.JWTError:
         return None
+
+
+# Generate Password Reset Token (15-minute validity)
+def create_reset_token(email: str) -> str:
+    expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode = {
+        "sub": email,
+        "purpose": "password_reset",
+        "exp": expire,
+    }
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+# Decode & Validate Password Reset Token
+def decode_reset_token(token: str) -> str | None:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("purpose") != "password_reset":
+            return None
+        return payload.get("sub")
+    except jwt.JWTError:
+        return None

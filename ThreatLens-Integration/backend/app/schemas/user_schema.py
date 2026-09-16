@@ -27,12 +27,30 @@ class UserRole(str, Enum):
     RESEARCHER = "researcher"
 
 
-# Register Request Schema
+# Register Request Schema (Admin-facing, role selectable)
 class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
     role: UserRole = UserRole.SECURITY_ANALYST
+
+
+# Self-service Sign-up Schema (role is always security_analyst)
+class UserSignup(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+
+
+# Forgot Password Request Schema
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+# Reset Password Request Schema
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 
 # Login Request Schema

@@ -24,7 +24,7 @@ const UNSCANNED_CONFIG = {
   label: "Unscanned",
   color: "text-muted",
   bg: "bg-white/5",
-  border: "border-border/30",
+  border: "border-strong/30",
   dot: "bg-muted",
 };
 
