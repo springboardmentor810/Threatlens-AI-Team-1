@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+*.log
+
+# TypeScript build outputs (tsc -b emits these next to the sources)
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Vite dev-server cache
+.vite

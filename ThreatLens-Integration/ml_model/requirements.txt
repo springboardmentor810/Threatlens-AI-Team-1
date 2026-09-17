@@ -1,0 +1,27 @@
+# =====================================================================
+# ThreatLens AI - Model Training & Analysis Dependencies
+# =====================================================================
+#
+# Everything needed to re-run preprocessing, training, tuning,
+# cross-validation and SHAP explainability under ml_model/.
+#
+# The inference stack (scikit-learn, lightgbm, joblib, numpy, pandas) is
+# declared in backend/requirements.txt because the API needs it to score
+# uploads. Install that first, then this:
+#
+#     pip install -r backend/requirements.txt
+#     pip install -r ml_model/requirements.txt
+#
+# The EMBER dataset itself is not in the repository (see .gitignore:
+# ml_model/dataset/raw/ and ml_model/dataset/processed/). preprocessing.py
+# expects ml_model/dataset/raw/train_ember_2018_v2_features.parquet.
+
+# --- Dataset preprocessing (parquet over DuckDB) ---
+duckdb==1.5.5
+pyarrow==25.0.1
+
+# --- Explainability ---
+shap==0.52.0
+
+# --- Plots for cross-validation and model comparison ---
+matplotlib==3.11.1

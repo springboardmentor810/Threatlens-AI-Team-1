@@ -1,0 +1,23 @@
+# Line-ending normalisation is on (core.autocrlf) for most clones. Git decides
+# text-vs-binary by looking for NUL bytes, which is a heuristic: a small PDF
+# has none and would be rewritten LF -> CRLF on checkout, corrupting its byte
+# offsets. Declare binary formats explicitly so they are never touched.
+
+*.pdf     binary
+*.pkl     binary
+*.joblib  binary
+*.npy     binary
+*.npz     binary
+*.parquet binary
+
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.svg     text
+
+*.exe     binary
+*.dll     binary
+*.bin     binary
+*.yar     text
